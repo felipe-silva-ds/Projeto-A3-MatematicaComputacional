@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FPBCIRCUITOS — Simulador de Circuitos Lógicos</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- TELA INICIAL -->
+<div id="screen-home" class="screen active">
+  <div class="home-bg">
+    <div class="grid-lines"></div>
+    <div class="pulse-ring"></div>
+  </div>
+  <div class="home-content">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="18" width="16" height="24" rx="3" stroke="var(--accent)" stroke-width="2"/>
+          <rect x="42" y="18" width="16" height="24" rx="3" stroke="var(--accent)" stroke-width="2"/>
+          <rect x="20" y="10" width="20" height="40" rx="4" stroke="var(--green)" stroke-width="2"/>
+          <line x1="18" y1="26" x2="20" y2="26" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="18" y1="34" x2="20" y2="34" stroke="var(--accent)" stroke-width="2"/>
+          <line x1="40" y1="30" x2="42" y2="30" stroke="var(--accent)" stroke-width="2"/>
+          <circle cx="30" cy="30" r="4" fill="var(--green)"/>
+        </svg>
+      </div>
+      <h1 class="logo-title">Logic<span>Sim</span></h1>
+      <p class="logo-sub">Simulador Interativo de Circuitos Lógicos</p>
+    </div>
+
+    <div class="home-cards">
+      <button class="card-btn primary" onclick="goTo('screen-builder')">
+        <span class="card-icon">⚡</span>
+        <span class="card-label">Novo Circuito</span>
+        <span class="card-desc">Crie do zero</span>
+      </button>
+      <button class="card-btn" onclick="loadExample(); goTo('screen-builder')">
+        <span class="card-icon">📂</span>
+        <span class="card-label">Exemplos</span>
+        <span class="card-desc">Circuitos prontos</span>
+      </button>
+      <button class="card-btn" onclick="goTo('screen-help')">
+        <span class="card-icon">📘</span>
+        <span class="card-label">Tutorial</span>
+        <span class="card-desc">Aprenda a usar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TELA BUILDER -->
+<div id="screen-builder" class="screen">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <button class="btn-icon" onclick="goTo('screen-home')" title="Início">⬅ Início</button>
+    <div class="topbar-title">
+      <span class="dot green"></span> FPBCIRCUITOS — Editor
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-sm" onclick="clearCanvas()">🗑 Limpar</button>
+      <button class="btn-sm" onclick="loadExample()">📂 Exemplo</button>
+      <button class="btn-primary" onclick="runSimulation()">▶ Simular</button>
+    </div>
+  </header>
+
+  <div class="builder-layout">
+
+    <!-- SIDEBAR ESQUERDA: Componentes -->
+    <aside class="sidebar-left">
+      <div class="sidebar-title">Entradas</div>
+      <div class="component-list">
+        <div class="comp-item" draggable="true" data-type="INPUT_A" title="Arraste para o canvas">
+          <span class="comp-icon">🔘</span> Entrada A
+        </div>
+        <div class="comp-item" draggable="true" data-type="INPUT_B">
+          <span class="comp-icon">🔘</span> Entrada B
+        </div>
+        <div class="comp-item" draggable="true" data-type="INPUT_C">
+          <span class="comp-icon">🔘</span> Entrada C
+        </div>
+      </div>
+
+      <div class="sidebar-title">Portas Lógicas</div>
+      <div class="component-list">
+        <div class="comp-item" draggable="true" data-type="AND">
+          <span class="comp-icon gate-icon">AND</span> AND
+        </div>
+        <div class="comp-item" draggable="true" data-type="OR">
+          <span class="comp-icon gate-icon">OR</span> OR
+        </div>
+        <div class="comp-item" draggable="true" data-type="NOT">
+          <span class="comp-icon gate-icon">NOT</span> NOT
+        </div>
+        <div class="comp-item" draggable="true" data-type="NAND">
+          <span class="comp-icon gate-icon">NAND</span> NAND
+        </div>
+        <div class="comp-item" draggable="true" data-type="NOR">
+          <span class="comp-icon gate-icon">NOR</span> NOR
+        </div>
+        <div class="comp-item" draggable="true" data-type="XOR">
+          <span class="comp-icon gate-icon">XOR</span> XOR
+        </div>
+        <div class="comp-item" draggable="true" data-type="XNOR">
+          <span class="comp-icon gate-icon">XNOR</span> XNOR
+        </div>
+      </div>
+
+      <div class="sidebar-title">Saída</div>
+      <div class="component-list">
+        <div class="comp-item" draggable="true" data-type="OUTPUT">
+          <span class="comp-icon">💡</span> Saída (LED)
+        </div>
+      </div>
+    </aside>
+
+    <!-- CANVAS -->
+    <main class="canvas-area">
+      <div class="canvas-hint" id="canvas-hint">
+        Arraste componentes da barra lateral para cá →<br>
+        <small>Clique em portas para conectá-las</small>
+      </div>
+      <canvas id="circuit-canvas"></canvas>
+    </main>
+
+    <!-- SIDEBAR DIREITA: Controles & Resultado -->
+    <aside class="sidebar-right">
+      <div class="sidebar-title">Entradas</div>
+      <div id="input-controls" class="input-controls">
+        <p class="hint-text">Adicione entradas ao canvas para controlar aqui.</p>
+      </div>
+
+      <div class="sidebar-title">Resultado</div>
+      <div class="result-panel" id="result-panel">
+        <div class="result-led off" id="result-led"></div>
+        <div class="result-label" id="result-label">—</div>
+        <div class="result-status" id="result-status">Aguardando simulação...</div>
+      </div>
+
+      <div class="sidebar-title">Tabela Verdade</div>
+      <div id="truth-table-area" class="truth-table-area">
+        <p class="hint-text">Simule para ver a tabela verdade.</p>
+      </div>
+
+      <button class="btn-primary full" onclick="runSimulation()" style="margin-top:12px">▶ Executar Simulação</button>
+    </aside>
+
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span id="status-msg">Pronto. Arraste componentes para começar.</span>
+    <span id="component-count">0 componentes</span>
+  </div>
+</div>
+
+<!-- TELA AJUDA / TUTORIAL -->
+<div id="screen-help" class="screen">
+  <header class="topbar">
+    <button class="btn-icon" onclick="goTo('screen-home')">⬅ Voltar</button>
+    <div class="topbar-title">📘 Tutorial & Ajuda</div>
+    <div></div>
+  </header>
+
+  <div class="help-content">
+    <section class="help-section">
+      <h2>Como usar o FPBCIRCUITOS</h2>
+      <ol class="steps-list">
+        <li><strong>Arraste</strong> uma ou mais <em>Entradas</em> (A, B, C) para o canvas.</li>
+        <li><strong>Arraste</strong> uma <em>Porta Lógica</em> (AND, OR, NOT…) para o canvas.</li>
+        <li><strong>Arraste</strong> uma <em>Saída (LED)</em> para o canvas.</li>
+        <li><strong>Conecte</strong> clicando primeiro num terminal de saída de um nó, depois num terminal de entrada do próximo.</li>
+        <li>Use os <strong>switches</strong> no painel direito para definir valores de entrada (0 ou 1).</li>
+        <li>Clique em <strong>▶ Simular</strong> para ver o resultado em tempo real.</li>
+      </ol>
+    </section>
+
+    <section class="help-section">
+      <h2>Portas Lógicas</h2>
+      <div class="gate-table">
+        <div class="gate-row header">
+          <span>Porta</span><span>Operação</span><span>Símbolo</span><span>Resultado</span>
+        </div>
+        <div class="gate-row"><span class="gate-badge">AND</span><span>E lógico</span><span>A · B</span><span>1 só se A=1 e B=1</span></div>
+        <div class="gate-row"><span class="gate-badge">OR</span><span>OU lógico</span><span>A + B</span><span>1 se A=1 ou B=1</span></div>
+        <div class="gate-row"><span class="gate-badge">NOT</span><span>NÃO lógico</span><span>¬A</span><span>Inverte a entrada</span></div>
+        <div class="gate-row"><span class="gate-badge">NAND</span><span>NÃO-E</span><span>¬(A·B)</span><span>Inverso do AND</span></div>
+        <div class="gate-row"><span class="gate-badge">NOR</span><span>NÃO-OU</span><span>¬(A+B)</span><span>Inverso do OR</span></div>
+        <div class="gate-row"><span class="gate-badge">XOR</span><span>OU exclusivo</span><span>A ⊕ B</span><span>1 se entradas diferentes</span></div>
+        <div class="gate-row"><span class="gate-badge">XNOR</span><span>Equivalência</span><span>¬(A⊕B)</span><span>1 se entradas iguais</span></div>
+      </div>
+    </section>
+
+    <section class="help-section">
+      <h2>Dicas</h2>
+      <ul class="tips-list">
+        <li>Clique em um nó para selecioná-lo. Pressione <kbd>Delete</kbd> para removê-lo.</li>
+        <li>Clique em "Exemplo" para carregar um circuito demonstrativo.</li>
+        <li>A tabela verdade é gerada automaticamente ao simular.</li>
+        <li>NOT aceita apenas 1 entrada; AND, OR, XOR, etc. aceitam 2.</li>
+      </ul>
+    </section>
+
+    <div class="help-cta">
+      <button class="btn-primary" onclick="goTo('screen-builder')">⚡ Ir para o Editor</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
