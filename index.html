@@ -72,17 +72,10 @@
     <!-- SIDEBAR ESQUERDA: Componentes -->
     <aside class="sidebar-left">
       <div class="sidebar-title">Entradas</div>
-      <div class="component-list">
-        <div class="comp-item" draggable="true" data-type="INPUT_A" title="Arraste para o canvas">
-          <span class="comp-icon">🔘</span> Entrada A
-        </div>
-        <div class="comp-item" draggable="true" data-type="INPUT_B">
-          <span class="comp-icon">🔘</span> Entrada B
-        </div>
-        <div class="comp-item" draggable="true" data-type="INPUT_C">
-          <span class="comp-icon">🔘</span> Entrada C
-        </div>
+      <div class="component-list" id="input-sidebar-list">
+        <!-- gerado dinamicamente pelo JS -->
       </div>
+      <button class="btn-sm full-sidebar" onclick="addNewInput()" style="margin:4px 8px 10px;width:calc(100% - 16px)">＋ Nova Entrada</button>
 
       <div class="sidebar-title">Portas Lógicas</div>
       <div class="component-list">
@@ -169,7 +162,7 @@
     <section class="help-section">
       <h2>Como usar o FPBCIRCUITOS</h2>
       <ol class="steps-list">
-        <li><strong>Arraste</strong> uma ou mais <em>Entradas</em> (A, B, C) para o canvas.</li>
+        <li>Clique em <strong>＋ Nova Entrada</strong> para adicionar entradas (A, B, C, D...) e arraste-as para o canvas.</li>
         <li><strong>Arraste</strong> uma <em>Porta Lógica</em> (AND, OR, NOT…) para o canvas.</li>
         <li><strong>Arraste</strong> uma <em>Saída (LED)</em> para o canvas.</li>
         <li><strong>Conecte</strong> clicando primeiro num terminal de saída de um nó, depois num terminal de entrada do próximo.</li>
@@ -213,3 +206,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+
