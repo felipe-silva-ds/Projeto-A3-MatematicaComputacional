@@ -72,6 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initCanvas();
+  rebuildInputSidebar();
 });
 
 // ── ADICIONAR NÓ ─────────────────────────
@@ -86,15 +87,34 @@ function addNode(type, x, y) {
   updateStatus();
   updateInputControls();
   render();
+  if (type.startsWith('INPUT')) rebuildInputSidebar();
 }
 
 function labelFor(type) {
+  if (type.startsWith('INPUT_')) return type.replace('INPUT_', '');
   const map = {
-    INPUT_A: 'A', INPUT_B: 'B', INPUT_C: 'C',
     AND:'AND', OR:'OR', NOT:'NOT', NAND:'NAND', NOR:'NOR', XOR:'XOR', XNOR:'XNOR',
     OUTPUT: 'OUT',
   };
   return map[type] || type;
+}
+
+// Letras disponíveis para entradas
+const INPUT_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+function getNextInputLetter() {
+  const used = state.nodes.filter(n => isInput(n.type)).map(n => n.type.replace('INPUT_',''));
+  return INPUT_LETTERS.find(l => !used.includes(l)) || 'X';
+}
+
+function addNewInput() {
+  const letter = getNextInputLetter();
+  const type = 'INPUT_' + letter;
+  // posição padrão escalonada
+  const existingInputs = state.nodes.filter(n => isInput(n.type));
+  const x = 60;
+  const y = 80 + existingInputs.length * 80;
+  addNode(type, x, y);
 }
 
 function isInput(type) { return type.startsWith('INPUT'); }
@@ -452,6 +472,7 @@ function removeNode(id) {
   updateHint();
   updateStatus();
   updateInputControls();
+  rebuildInputSidebar();
   render();
 }
 
@@ -466,6 +487,7 @@ function clearCanvas() {
   updateHint();
   updateStatus();
   updateInputControls();
+  rebuildInputSidebar();
   resetResult();
   clearTruthTable();
   render();
@@ -627,8 +649,8 @@ function generateTruthTable() {
   }
 
   const n = inputs.length;
-  if (n > 4) {
-    area.innerHTML = '<p class="hint-text">Tabela verdade disponível para até 4 entradas.</p>';
+  if (n > 6) {
+    area.innerHTML = '<p class="hint-text">Tabela verdade disponível para até 6 entradas (64 linhas). Adicione uma saída para simular.</p>';
     return;
   }
 
@@ -676,7 +698,24 @@ function clearTruthTable() {
 }
 
 // ── CONTROLES DE ENTRADA ─────────────────
+function rebuildInputSidebar() {
+  const list = document.getElementById('input-sidebar-list');
+  if (!list) return;
+  const inputs = state.nodes.filter(n => isInput(n.type));
+  if (inputs.length === 0) {
+    list.innerHTML = '<p class="hint-text" style="padding:6px 8px;font-size:11px">Clique + para adicionar</p>';
+    return;
+  }
+  list.innerHTML = inputs.map(inp => `
+    <div class="comp-item" draggable="true" data-type="${inp.type}"
+         style="justify-content:space-between"
+         ondragstart="event.dataTransfer.setData('type','${inp.type}')">
+      <span><span class="comp-icon">🔘</span> Entrada ${inp.label}</span>
+    </div>`).join('');
+}
+
 function updateInputControls() {
+  rebuildInputSidebar();
   const container = document.getElementById('input-controls');
   const inputs = state.nodes.filter(n => isInput(n.type));
 
@@ -703,7 +742,9 @@ function toggleInput(nodeId, checked) {
   state.inputValues[nodeId] = checked ? 1 : 0;
   const tv = document.getElementById(`tv-${nodeId}`);
   if (tv) tv.textContent = checked ? '1' : '0';
-  runSimulation();
+  // Não simula automaticamente — usuário deve clicar em Simular
+  setStatus('Entrada alterada. Clique em ▶ Simular para atualizar.');
+  render(); // só redesenha visualmente
 }
 
 // ── UI HELPERS ────────────────────────────
